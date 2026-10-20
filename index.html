@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Estudo de dados sobre câmbio, bolsa, juros, inflação, salário mínimo e PIB em cada mandato presidencial desde o Plano Real.">
+<meta property="og:title" content="Mandatos em Números">
+<meta property="og:description" content="Estudo de dados sobre câmbio, bolsa, juros, inflação, salário mínimo e PIB em cada mandato presidencial desde o Plano Real.">
+<meta property="og:type" content="website">
+<title>Mandatos em Números</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,700&family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* Layout: topo → presidente → contexto → destaques → categoria → período → gráfico e marcos → comparativo */
+:root{
+  --bg:#ffffff; --surface:#ffffff; --ink:#1f1f1f; --muted:#6e6e6e; --line:#ebebeb;
+  --accent:#2b2b2b; --accent-soft:#f3f3f3; --on-accent:#ffffff;
+  --head-bg:#ffffff; --head-fg:#1f1f1f; --head-muted:#6e6e6e;
+  --global:#ea580c; --dom:#0b8a4a; --band:rgba(0,0,0,.035); --warn-bg:#ffffff; --warn-fg:#8a8a8a;
+  /* cores dos dados: câmbio petróleo, bolsa azul-ardósia, juros âmbar, economia ameixa; sinais: alta verde, queda vermelho */
+  --c-cambio:#0e7480; --c-bolsa:#3b5998; --c-juros:#b8740f; --c-economia:#84398f; --c-empresas:#4b4f9e;
+  --up:#15803d; --down:#c0262d; --pres:var(--ink);
+  /* cores de partido: PSDB azul, PT vermelho, Bolsonaro verde (identidade de campanha; PSL/PL) */
+  --p-fhc:#0a5cad; --p-pt:#c8102e; --p-mdb:#b38600; --p-bolso:#16883a;
+  --cat:var(--c-bolsa);
+  --f-display:"Fraunces", Georgia, "Times New Roman", serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:var(--head-bg);color:var(--head-fg)}
+header.top .wrap{padding-block:48px 20px;display:grid;gap:12px}
+.eyebrow{font-size:14px;color:var(--head-muted)}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(34px,5.6vw,64px);line-height:1.04;margin:0;text-wrap:balance;letter-spacing:-.02em;font-variation-settings:"SOFT" 50}
+.hl{color:var(--c);background:linear-gradient(transparent 64%,color-mix(in srgb,var(--c) 18%,transparent) 64%);padding:0 .06em;font-style:italic;font-weight:700}
+.hl.c1{--c:var(--c-cambio)} .hl.c2{--c:var(--c-bolsa)} .hl.c3{--c:var(--c-juros)} .hl.c4{--c:var(--c-economia)}
+.lede{max-width:68ch;margin:0;color:var(--head-muted);font-size:17px;line-height:1.6}
+.notice{background:var(--warn-bg);color:var(--warn-fg);font-size:13px}
+.notice .wrap{padding-block:0 8px}
+.notice strong{font-weight:600}
+main .wrap{padding-block:24px 56px;display:grid;gap:22px}
+.filter{display:grid;gap:8px}
+.flabel{font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:14px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip:hover:not(:disabled){border-color:var(--c,var(--accent));color:var(--c,var(--ink))}
+.chip[aria-pressed="true"]:hover{color:var(--on-accent)}
+.chip:focus-visible,.sub:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip[aria-pressed="true"]{background:var(--c,var(--accent));border-color:var(--c,var(--accent));color:var(--on-accent)}
+.chip.cat{font-family:var(--f-display);font-size:17px}
+#presChips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#presChips .chip{justify-content:center;font-weight:600;padding:9px 10px}
+#presChips .chip:not([aria-pressed="true"]){color:var(--c,var(--ink));border-color:color-mix(in srgb,var(--c,var(--ink)) 35%,transparent)}
+#presChips .chip:not([aria-pressed="true"]):hover{background:color-mix(in srgb,var(--c,var(--ink)) 8%,#fff)}
+@media (max-width:700px){#presChips{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+.chip .yr{font-family:var(--f-mono);font-size:11px;opacity:.75}
+.chip.cat{border-radius:10px;padding:8px 18px;font-weight:800;border-width:2px}
+.chip.cat:not([aria-pressed="true"]):not(:disabled){color:var(--c);border-color:color-mix(in srgb,var(--c) 30%,transparent)}
+.subs{display:flex;flex-wrap:wrap;gap:4px 18px;border-bottom:1px solid var(--line)}
+.sub{font:inherit;font-size:14px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px 0 8px;cursor:pointer}
+.sub[aria-pressed="true"]{color:var(--cat);border-bottom:3px solid var(--cat);font-weight:600}
+.sub:disabled{opacity:.45;cursor:not-allowed}
+.ctx{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0;display:grid;gap:14px}
+.ctx-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.ctx-head{flex-direction:column;align-items:flex-start;gap:2px}
+.ctx-head h2{font-family:var(--f-display);font-size:clamp(30px,4.6vw,52px);line-height:1.05;margin:0;font-weight:900;letter-spacing:-.02em;color:var(--pc,var(--ink))}
+.ctx-head h2 em{font-style:italic;font-weight:600;color:var(--ink);font-size:.55em;letter-spacing:0;margin-left:.3em}
+.ctx-head .meta{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.ctx-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.ctx-cols h3{font-family:var(--f-display);font-size:19px;margin:0 0 6px;color:var(--ink);font-weight:800;font-style:italic}
+.ctx-cols h3.p{color:var(--pc,var(--ink))}
+.ctx-cols p{margin:0;font-size:14.5px;line-height:1.55;color:rgba(255,255,255,.93)}
+.ctx-cols>div{border-radius:22px;padding:18px 22px 20px;color:#fff;min-width:0}
+.ctx-cols>div:nth-child(1){background:#2b2b2b}
+.ctx-cols>div:nth-child(2){background:var(--global)}
+.ctx-cols>div:nth-child(3){background:var(--pc,#2b2b2b)}
+.ctx-cols>div h3{color:#fff!important;font-size:21px}
+#compTable th{text-align:center;padding:10px 12px}
+#compTable th:first-child{text-align:left}
+#compTable td{text-align:center;padding:9px 12px;vertical-align:middle}
+#compTable td:first-child{text-align:left}
+.cv{display:inline-block;min-width:84px;padding:6px 14px;border-radius:999px;font-family:var(--f-display);font-weight:800;font-size:17px;line-height:1.2;letter-spacing:-.01em;font-variant-numeric:tabular-nums lining-nums;color:var(--ink);background:#f3f3f3}
+.cv.up{color:var(--up);background:color-mix(in srgb,var(--up) 13%,#fff)}
+.cv.down{color:var(--down);background:color-mix(in srgb,var(--down) 12%,#fff)}
+#cmpStrip{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:14px}
+#cmpStrip span.l{color:var(--muted)}
+.empty-chart{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--muted);font-size:15px;background:rgba(255,255,255,.75)}
+#empView{display:grid;gap:12px}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:12px}
+.ecard{border-radius:20px;background:color-mix(in srgb,var(--c-empresas) 7%,#fff);padding:16px 18px;display:grid;gap:8px;align-content:start;min-width:0}
+.ecard.ref{background:#f3f3f3}
+.ecard.na{background:#f7f7f7;color:var(--muted)}
+.ecard .top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ecard h4{margin:0;font-family:var(--f-display);font-size:21px;font-weight:800;line-height:1.15}
+.ecard .rk{font-family:var(--f-display);font-weight:800;font-size:15px;color:var(--c-empresas)}
+.ecard .tk{font-size:12px;color:var(--muted)}
+.ecard .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ecard .row small{font-size:12px;color:var(--muted);display:block;margin-bottom:2px}
+.ecard canvas{width:100%;height:46px;display:block}
+.snap{display:grid;grid-template-columns:1fr auto;gap:5px 14px;margin:10px 0 0;font-size:14.5px}
+.snap dt{color:rgba(255,255,255,.85)}
+.snap dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.ctx-cols p.sub-h{font-size:13px;color:rgba(255,255,255,.8)}
+.pp{display:inline-block;color:#fff;font-family:var(--f-display);font-weight:800;font-size:15px;padding:4px 14px;border-radius:999px}
+#evList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px}
+.evc{border-radius:22px;padding:16px 20px 18px;color:#fff;display:grid;gap:6px;align-content:start;min-width:0}
+.evc.g{background:var(--global)} .evc.d{background:var(--dom)}
+.evc-top{display:flex;align-items:center;gap:10px;font-size:12px}
+.evc .n{width:26px;height:26px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.evc.g .n{color:var(--global)} .evc.d .n{color:var(--dom)}
+.evc .tag{text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:11px}
+.evc .dt{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}
+.evc .t{font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1.2}
+.evc p{margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.93)}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.kpi{background:color-mix(in srgb,var(--c) 10%,#fff);border-radius:20px;padding:14px 16px 12px;display:grid;gap:2px;min-width:0}
+.kpi .k{font-size:13px;color:var(--c);font-weight:700}
+.kpi .v{font-family:var(--f-display);font-size:clamp(28px,3vw,38px);font-weight:900;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .v.up,td.up{color:var(--up)} .kpi .v.down,td.down{color:var(--down)}
+.kpi .d{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.panel{background:var(--surface);padding:8px 0;display:grid;gap:16px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+.panel-head h2{margin:0;font-family:var(--f-display);font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.01em}
+.panel-head h2 .cw{color:var(--cat);font-style:italic}
+.panel-head .unit{font-size:13px;color:var(--muted)}
+.view-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.view-toggle button{font:inherit;font-size:13px;background:var(--surface);color:var(--muted);border:0;padding:6px 12px;cursor:pointer}
+.view-toggle button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.chart-box{position:relative;height:360px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--ink);align-items:center}
+.lg{padding:6px 12px;border-radius:999px;gap:8px!important}
+.lg .dot{width:12px;height:12px;border-radius:50%;flex:none}
+.lg.g{background:var(--global);color:#fff} .lg.g .dot{background:#fff}
+.lg.d{background:var(--dom);color:#fff} .lg.d .dot{background:#fff}
+.lg.band{background:var(--accent-soft)} .lg.band .dot{background:#cfcfcf;border-radius:3px}
+.lg b{font-weight:700}
+.hint{font-size:12px;color:var(--muted)}
+.evtip{position:absolute;z-index:5;pointer-events:none;width:270px;max-width:calc(100% - 8px);background:#1f1f1f;color:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:grid;gap:4px}
+.evtip .top{display:flex;align-items:center;gap:8px;font-size:12px;color:#cfcfcf}
+.evtip .tag{font-weight:700;padding:1px 8px;border-radius:999px;color:#fff;font-size:11px}
+.evtip .tag.g{background:var(--global)} .evtip .tag.d{background:var(--dom)}
+.evtip strong{font-size:15px;line-height:1.3}
+.evtip p{margin:0;font-size:13px;color:#e4e4e4;line-height:1.45}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.range{display:grid;gap:6px}
+.range-row{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.dual{position:relative;height:28px}
+.dual .track{position:absolute;left:0;right:0;top:12px;height:4px;border-radius:2px;background:var(--line)}
+.dual .fill{position:absolute;top:12px;height:4px;border-radius:2px;background:var(--pres)}
+.dual input{position:absolute;inset:0;width:100%;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none;height:28px}
+.dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--surface);border:3px solid var(--pres);cursor:grab}
+.dual input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);cursor:grab}
+.dual input::-moz-range-track{background:none}
+.events{display:grid;gap:14px}
+.events-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.events-head h3{margin:0;font-family:var(--f-display);font-size:24px;font-weight:800}
+.linkbtn{font:inherit;font-size:13px;background:none;border:0;color:var(--accent);cursor:pointer;padding:4px 0}
+.empty{font-size:13px;color:var(--muted);padding:8px 0}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);font-size:12px}
+td{font-family:var(--f-mono)}
+td:first-child{font-family:var(--f-body);font-weight:600}
+tr.sel td{background:var(--accent-soft)}
+.note{font-size:12px;color:var(--muted);margin:0;max-width:80ch}
+footer.foot .wrap{padding-block:0 40px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.ctx-cols{grid-template-columns:1fr}}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-box{height:290px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <div class="eyebrow" id="eyebrow">Estudo de dados · Brasil, 1994 a 2026</div>
+  <h1>Como se comportaram o <span class="hl c1">câmbio</span>, a <span class="hl c2">bolsa</span>, os <span class="hl c3">juros</span> e a <span class="hl c4">inflação</span> em cada mandato presidencial</h1>
+  <p class="lede">Indicadores econômicos de nove mandatos desde o Plano Real, todos medidos com as mesmas regras. Cada período começa meses antes da eleição e traz os acontecimentos nacionais e internacionais da época.</p>
+</div></header>
+<div class="notice"><div class="wrap"><strong>Fontes.</strong> Dólar, Selic, IPCA, salário mínimo, PIB e commodities: Banco Central do Brasil. Ibovespa, moedas, bolsas emergentes e ações: Yahoo Finance. Dados mensais.</div></div>
+
+<main><div class="wrap">
+  <section class="filter" aria-label="Presidente">
+    <div class="flabel">Presidente</div>
+    <div class="chips" id="presChips"></div>
+  </section>
+
+  <section class="ctx" id="ctx"></section>
+
+  <div style="display:grid;gap:8px">
+  <section class="kpis" id="kpis" aria-label="Resumo do período"></section>
+  <p class="note" id="kpiNote">Verde e vermelho seguem a ótica de quem vive e ganha em reais: dólar subindo aparece como o real perdendo valor, e inflação como perda de poder de compra. Para um exportador, por exemplo, um real mais fraco pode ser vantagem.</p>
+  </div>
+
+  <section class="filter" aria-label="Categoria">
+    <div class="flabel">Categoria</div>
+    <div class="chips" id="catChips"></div>
+    <div class="subs" id="subTabs"></div>
+  </section>
+
+  <section class="filter" id="yearFilter" aria-label="Período">
+    <div class="flabel">Período · zoom (muda o gráfico e os números acima)</div>
+    <div class="chips" id="yearChips"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div style="min-width:0"><h2 id="chartTitle"></h2><div class="unit" id="chartUnit"></div></div>
+      <div class="view-toggle" role="group" aria-label="Visualização">
+        <button id="vChart" aria-pressed="true">Gráfico</button><button id="vTable" aria-pressed="false">Tabela</button>
+      </div>
+    </div>
+    <div id="cmpStrip" hidden></div>
+    <div id="chartView" class="chart-box"><canvas id="chart" aria-label="Gráfico do indicador"></canvas><div class="evtip" id="evTip" hidden></div><div class="empty-chart" id="chartEmpty" hidden></div></div>
+    <div id="empView" hidden></div>
+    <div id="tableView" class="tbl-wrap" hidden></div>
+    <div class="legend">
+      <span class="lg g"><i class="dot"></i><b>Evento global</b> veio de fora do Brasil</span>
+      <span class="lg d"><i class="dot"></i><b>Evento nacional</b> decisão ou fato interno</span>
+      <span class="lg band"><i class="dot"></i><span id="bandLegend">Transição (eleição → posse)</span></span>
+      <span class="hint">Passe o mouse ou toque nos marcadores numerados para ver o que aconteceu.</span>
+    </div>
+    <div class="range">
+      <div class="range-row"><span id="rFrom"></span><span>arraste para ajustar o zoom</span><span id="rTo"></span></div>
+      <div class="dual"><div class="track"></div><div class="fill" id="rFill"></div>
+        <input type="range" id="rA" aria-label="Início do período"><input type="range" id="rB" aria-label="Fim do período"></div>
+    </div>
+    <div class="events">
+      <div class="events-head"><h3>Marcos no período</h3><button class="linkbtn" id="evToggle"></button></div>
+      <div id="evList"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Comparativo entre mandatos</h2><div class="unit">valores anualizados, da posse ao fim do mandato</div></div>
+    <div class="tbl-wrap" id="compTable"></div>
+    <p class="note">Mandatos têm durações diferentes, por isso tudo é anualizado. Salário mínimo real = reajuste nominal descontado o IPCA. A comparação mostra o que aconteceu no período, não prova causa: o contexto global de cada época pesa muito. PIB médio ponderado pelos meses de cada mandato no ano.</p>
+  </section>
+</div></main>
+<footer class="foot"><div class="wrap"><p class="note">Fontes: Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (SGS): dólar 3698, Selic 4189, IPCA 12 meses 13522, IPCA mensal 433, salário mínimo 1619, PIB 7326, IC-Br 27574. Yahoo Finance: Ibovespa (^BVSP), dólar (BRL=X), moedas de México, África do Sul, Chile, Colômbia, Índia e Indonésia, ETFs EWZ e EEM, ações listadas na B3.</p></div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="dados.js"></script>
+<script>
+const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const ym=s=>{const[y,m]=s.split('-').map(Number);return y*12+(m-1)};
+const mShort=m=>MESES[((m%12)+12)%12]+'/'+String(Math.floor(m/12)).slice(2);
+const mLong=m=>MESES[((m%12)+12)%12]+'/'+Math.floor(m/12);
+const nf=(v,d)=>v==null||isNaN(v)?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const sg=v=>/^\+/.test(v)?'up':/^[-−]/.test(v)?'down':'';
+const pct=(v,d=1)=>v==null||isNaN(v)?'—':(v>0?'+':'')+nf(v,d)+'%';
+
+
+const P={
+fhc1:{col:'--p-fhc',name:'FHC 1',full:'Fernando Henrique Cardoso · 1º mandato',yr:'1995',elec:'Eleito no 1º turno em 03/10/1994',start:'1994-07',posse:'1995-01',end:'1998-12',
+ ext:'Crise do México (dez/1994), crise asiática (1997) e moratória da Rússia (ago/1998) provocam saída de capital de países emergentes. Os EUA sobem juros ao longo de 1994.',
+ ipcaFrom:'1995-06',
+ note:'A inflação em 12 meses aparece a partir de jun/1995. Antes disso, a conta ainda inclui meses anteriores ao Plano Real (em set/1994 passava de 2.000%).',
+ events:[
+  ['1994-07-01','d',1,'Lançamento do real','Nova moeda entra em circulação; a inflação mensal cai de 47,4% em junho para 6,8% em julho.'],
+  ['1994-10-03','d',1,'Eleição: FHC vence no 1º turno','Ex-ministro da Fazenda responsável pelo Plano Real é eleito presidente.'],
+  ['1994-12-20','g',1,'Crise do México','Desvalorização do peso mexicano provoca fuga de capital de países emergentes.'],
+  ['1995-03-06','d',2,'Mudança na banda cambial','Banco Central altera o regime de câmbio e eleva os juros após perda de reservas.'],
+  ['1996-09-13','d',2,'Lei Kandir','Exportações de produtos primários e semimanufaturados ficam isentas de ICMS.'],
+  ['1997-05-06','d',2,'Privatização da Vale','Controle da Companhia Vale do Rio Doce é vendido em leilão.'],
+  ['1997-07-02','g',1,'Início da crise asiática','Tailândia desvaloriza a moeda; a crise se espalha pela Ásia nos meses seguintes.'],
+  ['1997-10-30','d',2,'Selic quase dobra','Banco Central eleva os juros para cerca de 43% ao ano para conter saída de dólares.'],
+  ['1998-07-29','d',2,'Privatização do Sistema Telebras','Estatal de telecomunicações é dividida em 12 empresas e leiloada.'],
+  ['1998-08-17','g',1,'Moratória da Rússia','Rússia suspende pagamentos da dívida; o Brasil perde reservas nas semanas seguintes.']
+ ]},
+fhc2:{col:'--p-fhc',name:'FHC 2',full:'Fernando Henrique Cardoso · 2º mandato',yr:'1999',elec:'Reeleito no 1º turno em 04/10/1998',start:'1998-09',posse:'1999-01',end:'2002-12',
+ ext:'Moratória da Rússia (1998), queda das ações de empresas de internet nos EUA (2000), atentados de 11 de setembro e crise da Argentina (2001).',
+ events:[
+  ['1998-08-17','g',1,'Moratória da Rússia','Rússia suspende pagamentos da dívida; investidores retiram recursos de países emergentes.'],
+  ['1998-10-04','d',1,'Eleição: FHC reeleito no 1º turno','Primeira eleição com reeleição permitida para presidente.'],
+  ['1998-11-13','d',2,'Acordo com o FMI','Pacote de cerca de US$ 41 bilhões com FMI e outros credores.'],
+  ['1999-01-13','d',1,'Fim da banda cambial','O câmbio passa a flutuar; o dólar sai de R$ 1,21 para mais de R$ 2 em semanas.'],
+  ['1999-06-21','d',2,'Regime de metas de inflação','Banco Central passa a perseguir uma meta anual para o IPCA.'],
+  ['2000-03-10','g',1,'Pico da Nasdaq','Índice de tecnologia dos EUA atinge o recorde e entra em queda prolongada.'],
+  ['2000-05-04','d',2,'Lei de Responsabilidade Fiscal','Lei fixa limites de gasto e endividamento para União, estados e municípios.'],
+  ['2001-06-01','d',2,'Racionamento de energia','Consumidores e empresas passam a ter metas obrigatórias de redução de consumo.'],
+  ['2001-09-11','g',1,'Atentados de 11 de setembro','Bolsas globais caem; o Ibovespa chega a cerca de 10 mil pontos no fim de setembro.'],
+  ['2001-12-23','g',2,'Moratória da Argentina','País vizinho suspende o pagamento da dívida externa.'],
+  ['2002-06-22','d',1,'Carta ao Povo Brasileiro','Candidato líder nas pesquisas divulga compromisso com contratos e metas; dólar e risco-país seguem em alta até a eleição.']
+ ]},
+lula1:{col:'--p-pt',name:'Lula 1',full:'Luiz Inácio Lula da Silva · 1º mandato',yr:'2003',elec:'Eleito no 2º turno em 27/10/2002',start:'2002-06',posse:'2003-01',end:'2006-12',
+ ext:'Juros baixos nos EUA até 2004 e demanda crescente da China elevam os preços de commodities exportadas pelo Brasil. Guerra do Iraque em 2003.',
+ events:[
+  ['2002-06-22','d',1,'Carta ao Povo Brasileiro','Candidato do PT divulga compromisso com contratos, superávit e metas de inflação.'],
+  ['2002-08-07','d',2,'Novo acordo com o FMI','Empréstimo de cerca de US$ 30 bilhões, com a maior parte liberada a partir de 2003.'],
+  ['2002-10-27','d',1,'Eleição: Lula vence no 2º turno','Dólar havia chegado perto de R$ 4 nas semanas anteriores à votação.'],
+  ['2003-03-20','g',2,'Início da guerra do Iraque','Petróleo oscila e bolsas globais retomam alta nos meses seguintes.'],
+  ['2003-12-19','d',2,'Reforma da Previdência dos servidores','Emenda constitucional muda regras de aposentadoria do setor público.'],
+  ['2004-06-30','g',1,'Fed começa a subir juros','Primeira alta dos juros americanos desde 2000.'],
+  ['2005-06-06','d',1,'Denúncia do mensalão','Escândalo de pagamentos a parlamentares abre crise política.'],
+  ['2005-12-13','d',2,'Quitação da dívida com o FMI','Governo antecipa o pagamento de cerca de US$ 15,5 bilhões ao Fundo.'],
+  ['2006-05-10','g',2,'Turbulência nos emergentes','Alta de juros nos EUA provoca queda de bolsas e moedas de países emergentes.']
+ ]},
+lula2:{col:'--p-pt',name:'Lula 2',full:'Luiz Inácio Lula da Silva · 2º mandato',yr:'2007',elec:'Reeleito no 2º turno em 29/10/2006',start:'2006-09',posse:'2007-01',end:'2010-12',
+ ext:'Preços de commodities em alta até meados de 2008, crise financeira global após a quebra do Lehman Brothers e compras de títulos pelos bancos centrais a partir de 2009.',
+ events:[
+  ['2006-10-29','d',1,'Eleição: Lula reeleito no 2º turno','Câmbio e bolsa têm variações pequenas na semana da votação.'],
+  ['2007-02-27','g',2,'Queda da bolsa de Xangai','Recuo de 9% na China derruba bolsas globais por alguns dias.'],
+  ['2007-08-09','g',2,'Início da crise do subprime','BNP Paribas congela fundos ligados a hipotecas americanas.'],
+  ['2007-11-08','d',1,'Anúncio do pré-sal (Tupi)','Petrobras anuncia descoberta de grandes reservas de petróleo.'],
+  ['2008-04-30','d',1,'Grau de investimento (S&P)','Agência classifica o Brasil como grau de investimento pela primeira vez.'],
+  ['2008-07-11','g',2,'Petróleo a US$ 147','Barril atinge o recorde histórico nominal.'],
+  ['2008-09-15','g',1,'Quebra do Lehman Brothers','Crise financeira global; dólar sobe e Ibovespa cai cerca de 40% em dois meses.'],
+  ['2009-01-21','d',2,'Banco Central começa a cortar juros','Selic cai de 13,75% para 8,75% ao longo de 2009.'],
+  ['2009-03-18','g',1,'Fed amplia compra de títulos','Banco central dos EUA anuncia compras de US$ 1 trilhão em títulos.'],
+  ['2009-10-19','d',2,'IOF sobre capital estrangeiro','Governo cria imposto de 2% sobre entrada de recursos em renda fixa e ações.'],
+  ['2010-09-23','d',2,'Capitalização da Petrobras','Oferta de ações de cerca de R$ 120 bilhões, ligada ao pré-sal.'],
+  ['2010-10-31','d',2,'Eleição de Dilma Rousseff','Candidata do PT vence no 2º turno.']
+ ]},
+dilma1:{col:'--p-pt',name:'Dilma 1',full:'Dilma Rousseff · 1º mandato',yr:'2011',elec:'Eleita no 2º turno em 31/10/2010',start:'2010-09',posse:'2011-01',end:'2014-12',
+ ext:'Crise da dívida na zona do euro (2011–2012), desaceleração da China e anúncio de redução de estímulos pelo Fed em 2013. O petróleo cai mais de 40% no 2º semestre de 2014.',
+ events:[
+  ['2010-10-31','d',1,'Eleição: Dilma vence no 2º turno','Primeira mulher eleita presidente do Brasil.'],
+  ['2011-08-05','g',1,'EUA perdem a nota máxima (S&P)','Rebaixamento inédito da dívida americana derruba bolsas globais.'],
+  ['2011-08-31','d',2,'Banco Central começa a cortar juros','Ciclo leva a Selic de 12,5% para 7,25% até out/2012.'],
+  ['2012-07-26','g',2,'BCE promete defender o euro','Discurso de Mario Draghi reduz o risco de ruptura da zona do euro.'],
+  ['2012-09-11','d',2,'MP 579 do setor elétrico','Medida antecipa renovação de concessões em troca de tarifas menores.'],
+  ['2013-05-22','g',1,'Fed sinaliza menos estímulos','Anúncio de redução de compras de títulos provoca alta do dólar nos emergentes.'],
+  ['2013-06-17','d',2,'Protestos de junho','Manifestações se espalham pelo país.'],
+  ['2014-03-17','d',2,'Início da Operação Lava Jato','Investigação sobre contratos da Petrobras é deflagrada.'],
+  ['2014-07-01','g',2,'Começa a queda do petróleo','Barril sai de mais de US$ 100 e termina o ano perto de US$ 55.'],
+  ['2014-10-26','d',1,'Eleição: Dilma reeleita no 2º turno','Ibovespa cai cerca de 3% no pregão seguinte.']
+ ]},
+dilma2:{col:'--p-pt',name:'Dilma 2',full:'Dilma Rousseff · 2º mandato',yr:'2015',elec:'Reeleita no 2º turno em 26/10/2014 · afastada em 12/05/2016',start:'2014-09',posse:'2015-01',end:'2016-04',
+ ext:'Queda dos preços de petróleo e minério, desvalorização do yuan pela China (ago/2015) e primeira alta de juros nos EUA desde 2006 (dez/2015).',
+ events:[
+  ['2014-10-26','d',1,'Eleição: Dilma reeleita no 2º turno','Resultado de 51,6% a 48,4%.'],
+  ['2014-11-27','d',2,'Joaquim Levy na Fazenda','Novo ministro anuncia metas de superávit primário.'],
+  ['2015-08-11','g',1,'China desvaloriza o yuan','Movimento derruba moedas e commodities de países emergentes.'],
+  ['2015-09-09','d',1,'Perda do grau de investimento (S&P)','Brasil é rebaixado para grau especulativo.'],
+  ['2015-12-02','d',1,'Aberto o processo de impeachment','Presidente da Câmara aceita o pedido de abertura.'],
+  ['2015-12-16','g',2,'Fed sobe juros','Primeira alta dos juros americanos desde 2006.'],
+  ['2016-01-20','g',2,'Petróleo abaixo de US$ 30','Barril atinge o menor valor desde 2003.'],
+  ['2016-04-17','d',1,'Câmara aprova o impeachment','Processo segue para o Senado.']
+ ]},
+temer:{col:'--p-mdb',name:'Temer',full:'Michel Temer · mandato',yr:'2016',elec:'Assumiu com o afastamento de Dilma em 12/05/2016 · efetivado em 31/08/2016',start:'2016-04',posse:'2016-05',end:'2018-12',
+ ext:'Juros baixos nos países ricos, saída do Reino Unido da União Europeia (2016) e eleição de Donald Trump (2016). Em 2018, alta de juros nos EUA e crises cambiais na Argentina e na Turquia.',
+ events:[
+  ['2016-05-12','d',1,'Senado afasta Dilma; Temer assume','Vice-presidente assume a Presidência interinamente.'],
+  ['2016-06-23','g',2,'Referendo do Brexit','Reino Unido vota pela saída da União Europeia.'],
+  ['2016-08-31','d',1,'Senado conclui o impeachment','Temer é efetivado no cargo até o fim de 2018.'],
+  ['2016-11-08','g',2,'Eleição de Donald Trump','Dólar sobe frente a moedas de emergentes nas semanas seguintes.'],
+  ['2016-12-15','d',1,'Teto de gastos promulgado','Emenda 95 limita o crescimento das despesas federais à inflação.'],
+  ['2017-05-17','d',1,'Delação da JBS','Divulgação de gravação envolvendo o presidente; Ibovespa cai 8,8% no dia seguinte.'],
+  ['2017-07-13','d',2,'Reforma trabalhista sancionada','Lei altera mais de cem pontos da CLT.'],
+  ['2018-05-21','d',2,'Greve dos caminhoneiros','Paralisação de cerca de dez dias afeta o abastecimento no país.'],
+  ['2018-10-28','d',2,'Eleição de Jair Bolsonaro','Candidato do PSL vence no 2º turno.']
+ ]},
+bolso:{col:'--p-bolso',name:'Bolsonaro',full:'Jair Bolsonaro · mandato',yr:'2019',elec:'Eleito no 2º turno em 28/10/2018',start:'2018-09',posse:'2019-01',end:'2022-12',
+ ext:'Pandemia de Covid-19 (2020) com juros perto de zero no mundo, seguida de alta global da inflação, guerra na Ucrânia (2022) e ciclo de alta de juros do Fed.',
+ events:[
+  ['2018-10-28','d',1,'Eleição: Bolsonaro vence no 2º turno','Ibovespa sobe cerca de 10% em outubro de 2018.'],
+  ['2019-10-23','d',1,'Reforma da Previdência aprovada','Senado conclui a votação da emenda constitucional.'],
+  ['2020-03-11','g',1,'OMS declara pandemia de Covid-19','Ibovespa cai cerca de 30% em março; o pregão é interrompido seis vezes.'],
+  ['2020-04-02','d',2,'Auxílio emergencial sancionado','Programa de transferência de renda para trabalhadores informais e desempregados.'],
+  ['2020-04-24','d',2,'Saída de Sergio Moro','Ministro da Justiça deixa o governo; dólar renova máxima nominal.'],
+  ['2020-08-05','d',2,'Selic na mínima histórica (2%)','Juro real fica negativo.'],
+  ['2021-02-19','d',2,'Troca no comando da Petrobras','Governo indica novo presidente para a estatal; ações caem cerca de 20% no pregão seguinte.'],
+  ['2021-03-17','d',1,'Banco Central começa a subir juros','Selic sai de 2% e chega a 13,75% em agosto de 2022.'],
+  ['2021-10-21','d',2,'Mudança no teto de gastos','PEC dos Precatórios altera o cálculo do teto; juros futuros e dólar sobem.'],
+  ['2022-02-24','g',1,'Invasão da Ucrânia','Petróleo, gás e grãos sobem; inflação global acelera.'],
+  ['2022-10-30','d',2,'Eleição de Lula','Candidato do PT vence no 2º turno.']
+ ]},
+lula3:{col:'--p-pt',name:'Lula 3',full:'Luiz Inácio Lula da Silva · 3º mandato',yr:'2023',elec:'Eleito no 2º turno em 30/10/2022 · mandato em curso, dados até '+mLong(ym(DADOS_ATE)),start:'2022-09',posse:'2023-01',end:DADOS_ATE,
+ ext:'Juros altos nos EUA até 2024, início dos cortes pelo Fed em set/2024 e aumento de tarifas de importação pelos EUA em 2025, incluindo sobretaxa sobre produtos brasileiros.',
+ note:'Mandato em curso: dados até '+mLong(ym(DADOS_ATE))+'. O PIB mais recente é o de '+Math.max(...Object.keys(PIB).map(Number))+'.',
+ events:[
+  ['2022-10-30','d',1,'Eleição: Lula vence no 2º turno','Disputa mais apertada desde a redemocratização: 50,9% a 49,1%.'],
+  ['2022-12-21','d',2,'PEC da Transição promulgada','Emenda amplia o limite de gastos de 2023.'],
+  ['2023-03-10','g',2,'Quebra do Silicon Valley Bank','Falência de banco americano provoca turbulência no setor bancário global.'],
+  ['2023-03-30','d',1,'Novo arcabouço fiscal apresentado','Regra substitui o teto e vincula gastos ao crescimento da receita.'],
+  ['2023-08-02','d',2,'Banco Central começa a cortar juros','Selic cai de 13,75% para 10,5% até maio de 2024.'],
+  ['2023-12-20','d',1,'Reforma tributária promulgada','Emenda unifica tributos sobre consumo em um IVA dual.'],
+  ['2024-04-15','d',2,'Revisão da meta fiscal de 2025','Meta de superávit de 0,5% do PIB passa para resultado zero.'],
+  ['2024-09-18','g',2,'Fed começa a cortar juros','Primeiro corte dos juros americanos desde 2020.'],
+  ['2024-11-27','d',1,'Pacote de gastos e isenção de IR','Anúncio conjunto das medidas; dois dias depois, o dólar passa de R$ 6 pela primeira vez.'],
+  ['2024-12-11','d',2,'Selic sobe 1 ponto','Banco Central eleva a taxa para 12,25% e sinaliza novas altas.'],
+  ['2025-04-02','g',1,'EUA anunciam tarifas amplas','Novas tarifas de importação sobre dezenas de países abalam mercados globais.'],
+  ['2025-07-09','g',1,'Tarifa de 50% sobre o Brasil','Governo americano anuncia sobretaxa sobre produtos brasileiros.']
+ ]}
+};
+
+const O0=ym(BCB_START);const at=(arr,m)=>{const v=arr?arr[m-O0]:null;return v==null?null:v;};
+const EMPN={PETR4:'Petrobras',VALE3:'Vale',ITUB4:'Itaú Unibanco',BBDC4:'Bradesco',BBAS3:'Banco do Brasil',ABEV3:'Ambev',BPAC11:'BTG Pactual',ELET6:'Eletrobras'};
+const MAIORES={fhc1:['Telebras','PETR4','ELET6','VALE3','BBAS3'],fhc2:['PETR4','Telemar','VALE3','ITUB4','BBDC4'],lula1:['PETR4','VALE3','ABEV3','ITUB4','BBDC4'],lula2:['PETR4','VALE3','BBDC4','ITUB4','BBAS3'],dilma1:['PETR4','VALE3','ABEV3','ITUB4','BBDC4'],dilma2:['ABEV3','ITUB4','PETR4','BBDC4','VALE3'],temer:['ABEV3','ITUB4','BBDC4','PETR4','VALE3'],bolso:['PETR4','ITUB4','VALE3','ABEV3','BBDC4'],lula3:['PETR4','VALE3','ITUB4','ABEV3','BPAC11']};
+const empPx=(t,m)=>at(EMP[t],m);
+const IDS=Object.keys(P);
+for(const id of IDS){const p=P[id];p.id=id;p.a=ym(p.start);p.p=ym(p.posse);p.b=ym(p.end);
+  const o0=ym(BCB_START);p.usdM={};p.selicM={};p.ipcaM={};p.smM={};p.price={};let acc=1;
+  p.ibovM={};for(let m=p.a;m<=p.b;m++)p.ibovM[m]=at(MK.ibov,m);
+  for(let m=p.a;m<=p.b;m++){const i=m-o0;p.usdM[m]=BCB.usd[i];p.selicM[m]=BCB.selic[i];p.ipcaM[m]=BCB.ipca12[i];p.smM[m]=BCB.sm[i];acc*=1+BCB.ipcaMo[i]/100;p.price[m]=acc;}
+  if(p.ipcaFrom){const f=ym(p.ipcaFrom);for(let m=p.a;m<f;m++)p.ipcaM[m]=null;}
+  p.pib={};for(let y=Math.floor(p.p/12);y<=Math.floor(p.b/12);y++)if(PIB[y]!=null)p.pib[y]=PIB[y];
+  p.ev=p.events.map(([d,k,lvl,t,desc])=>{const[y,mo,dd]=d.split('-').map(Number);return{d,k,lvl,t,desc,x:(y*12+mo-1+(dd-1)/31)/12,m:y*12+mo-1}});
+}
+
+const CATS=[
+ {id:'cambio',col:'--c-cambio',label:'Câmbio',subs:[
+  {id:'usd',label:'Dólar comercial',unit:'R$ por US$ · média mensal de venda (BCB, série 3698)',dec:2,get:(p,m)=>p.usdM[m]},
+  {id:'usdvar',label:'Variação acumulada',unit:'% desde o início da janela visível',dec:1,rel:true,get:(p,m)=>p.usdM[m]},
+  {id:'fxem',label:'vs. emergentes',unit:'valor de cada moeda frente ao dólar · 100 no início da janela visível · abaixo de 100 = perdeu valor',dec:1,multi:'fx'}]},
+ {id:'bolsa',col:'--c-bolsa',label:'Bolsa',subs:[
+  {id:'ibov',label:'Ibovespa em R$',unit:'pontos',dec:0,get:(p,m)=>p.ibovM[m]},
+  {id:'ibovusd',label:'Ibovespa em US$',unit:'pontos ÷ dólar · mostra o ganho para quem pensa em moeda forte',dec:0,get:(p,m)=>p.ibovM[m]/p.usdM[m]},
+  {id:'ibovvar',label:'Variação acumulada',unit:'% desde o início da janela visível',dec:1,rel:true,get:(p,m)=>p.ibovM[m]},
+  {id:'eqem',label:'vs. emergentes',unit:'bolsas em dólar · 100 no início da janela visível · ETF do Brasil (EWZ) e de emergentes (EEM)',dec:1,multi:'eq'}]},
+ {id:'juros',col:'--c-juros',label:'Juros',subs:[
+  {id:'selic',label:'Selic',unit:'% ao ano · taxa efetiva média do mês, anualizada (BCB, série 4189)',dec:2,get:(p,m)=>p.selicM[m]},
+  {id:'juroreal',label:'Juro real aproximado',unit:'Selic menos IPCA 12 meses, % ao ano',dec:1,get:(p,m)=>p.ipcaM[m]==null?null:p.selicM[m]-p.ipcaM[m]}]},
+ {id:'economia',col:'--c-economia',label:'Economia',subs:[
+  {id:'ipca',label:'Inflação (IPCA 12m)',unit:'% acumulado em 12 meses',dec:2,get:(p,m)=>p.ipcaM[m]},
+  {id:'sm',label:'Salário mínimo',unit:'R$ nominais',dec:0,step:true,get:(p,m)=>p.smM[m]},
+  {id:'smreal',label:'Salário mínimo real',unit:'R$ a preços do início da janela visível',dec:0,step:true,real:true,get:(p,m)=>p.smM[m]},
+  {id:'pib',label:'PIB',unit:'crescimento real no ano, %',dec:1,bar:true},
+  {id:'icbr',label:'Commodities',unit:'Índice de Commodities Brasil (IC-Br), do Banco Central, em reais',dec:0,get:(p,m)=>at(BCB.icbr,m)}]},
+ {id:'empresas',col:'--c-empresas',label:'Empresas',subs:[{id:'top5',label:'5 maiores do início do mandato',unit:'variação no período visível, com dividendos reinvestidos',emp:true}]}
+];
+
+const S={pres:'lula2',cat:'bolsa',sub:'ibovusd',a:null,b:null,yearSel:'all',view:'chart',showAll:false};
+const $=id=>document.getElementById(id);
+const active=()=>S.pres==='todos'?IDS.map(i=>P[i]):[P[S.pres]];
+const bounds=()=>{const ps=active();return[Math.min(...ps.map(p=>p.a)),Math.max(...ps.map(p=>p.b))]};
+const curSub=()=>CATS.find(c=>c.id===S.cat).subs.find(s=>s.id===S.sub);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function renderPres(){
+  const el=$('presChips');el.innerHTML='';
+  const mk=(id,label,yr)=>{const b=document.createElement('button');b.className='chip';b.type='button';if(P[id])b.style.setProperty('--c',`var(${P[id].col})`);
+    b.innerHTML=label+(yr?` <span class="yr">${yr}</span>`:'');b.setAttribute('aria-pressed',S.pres===id);
+    b.onclick=()=>{S.pres=id;S.yearSel='all';resetRange();renderAll();};
+    el.appendChild(b);};
+  for(const id of IDS)mk(id,P[id].name,P[id].yr);
+  mk('todos','Comparar todos','');
+}
+function renderCtx(){
+  const el=$('ctx');
+  if(S.pres==='todos'){el.style.removeProperty('--pc');el.innerHTML=`<div class="ctx-head"><h2>Todos os mandatos desde o Plano Real</h2><span class="meta">${IDS.map(i=>P[i].name).join(' · ')}</span></div><p style="margin:0;font-size:14px;max-width:75ch">Cada faixa do gráfico marca um mandato, da posse ao fim. Nesta visão aparecem só os marcos principais; escolha um presidente para ver os números de início e fim e dar zoom por ano.</p>`;return;}
+  const p=P[S.pres];el.style.setProperty('--pc',`var(${p.col})`);
+  const[nm,rest]=p.full.split(' · ');
+  const snap=m=>{const ip=p.ipcaM[m];return `<dl class="snap">
+    <dt>Dólar</dt><dd>R$ ${nf(p.usdM[m],2)}</dd>
+    <dt>Selic</dt><dd>${nf(p.selicM[m],2)}%</dd>
+    <dt>IPCA 12 meses</dt><dd>${ip==null?'—':nf(ip,1)+'%'}</dd>
+    <dt>Salário mínimo</dt><dd>R$ ${nf(p.smM[m],0)}</dd>
+    <dt>Ibovespa</dt><dd>${nf(p.ibovM[m],0)}</dd></dl>`};
+  const s0=p.p-1;
+  el.innerHTML=`<div class="ctx-head"><h2>${nm}<em>${rest}</em></h2><span class="meta">${p.elec} · posse ${mLong(p.p)} · fim ${mLong(p.b)}</span></div>
+  <div class="ctx-cols"><div><h3>Ponto de partida</h3><p class="sub-h">${mLong(s0)}, mês anterior à posse</p>${snap(s0)}</div><div><h3>Cenário externo</h3><p>${p.ext}</p></div><div><h3>Ponto de chegada</h3><p class="sub-h">${mLong(p.b)}${p.id==='lula3'?', último dado disponível':', fim do mandato'}</p>${snap(p.b)}</div></div>${p.note?`<p class="note">${p.note}</p>`:''}`;
+}
+function resetRange(){const[a,b]=bounds();S.a=a;S.b=b;}
+function renderYears(){
+  const box=$('yearFilter');const el=$('yearChips');el.innerHTML='';
+  if(S.pres==='todos'){box.hidden=true;return;}box.hidden=false;
+  const p=P[S.pres];
+  const opts=[['all',p.id==='temer'?'Afastamento + mandato':'Eleição + mandato',p.a,p.b],['trans',p.id==='temer'?'Antes da posse':'Eleição → posse',p.a,p.p-1],['term','Só o mandato',p.p,p.b]];
+  for(let y=Math.floor(p.p/12);y<=Math.floor(p.b/12);y++){const ya=Math.max(y*12,p.a),yb=Math.min(y*12+11,p.b);opts.push([String(y),String(y)+(yb-ya<11?' (até '+MESES[yb%12]+')':''),ya,yb]);}
+  for(const[id,l,a,b]of opts){const c=document.createElement('button');c.className='chip';c.type='button';c.textContent=l;c.style.setProperty('--c','var(--pres)');
+    c.setAttribute('aria-pressed',S.yearSel===id);c.onclick=()=>{S.yearSel=id;S.a=a;S.b=b;renderAll();};el.appendChild(c);}
+}
+function renderCats(){
+  const el=$('catChips');el.innerHTML='';
+  const cc=CATS.find(c=>c.id===S.cat);document.documentElement.style.setProperty('--cat',`var(${cc.col})`);document.documentElement.style.setProperty('--pres',S.pres==='todos'?'var(--ink)':`var(${P[S.pres].col})`);
+  for(const c of CATS){const b=document.createElement('button');b.className='chip cat';b.type='button';b.textContent=c.label;if(c.col)b.style.setProperty('--c',`var(${c.col})`);
+    b.setAttribute('aria-pressed',S.cat===c.id);
+    if(c.disabled){b.disabled=true;b.title='Em breve, com os dados reais';}else b.onclick=()=>{S.cat=c.id;S.sub=c.subs[0].id;renderAll();};
+    el.appendChild(b);}
+  const st=$('subTabs');st.innerHTML='';
+  for(const s of CATS.find(c=>c.id===S.cat).subs){const b=document.createElement('button');b.className='sub';b.type='button';b.textContent=s.label;
+    b.setAttribute('aria-pressed',S.sub===s.id);
+    if(s.disabled){b.disabled=true;b.title='Em breve, com os dados reais';}else if(S.pres==='todos'&&(s.multi||s.emp)){b.disabled=true;b.title='Escolha um presidente para ver esta análise';}else b.onclick=()=>{S.sub=s.id;renderAll();};
+    st.appendChild(b);}
+}
+
+function seriesFor(p,sub){
+  const a=Math.max(S.a,S.pres==='todos'?p.p:p.a),b=Math.min(S.b,p.b);if(a>b)return[];
+  if(sub.bar){const out=[];for(const[y,v]of Object.entries(p.pib)){const yy=+y;if(yy*12+11>=a&&yy*12<=b)out.push({x:yy+0.5,y:v,m:yy*12});}return out;}
+  const out=[];let base=null,bm=a;for(let m=a;m<=b;m++){const v=sub.get(p,m);if(v!=null){base=v;bm=m;break;}}
+  for(let m=a;m<=b;m++){let v=sub.get(p,m);
+    if(v==null||base==null){out.push({x:m/12,y:null,m});continue;}
+    if(sub.rel)v=(v/base-1)*100;
+    if(sub.real)v=v/(p.price[m]/p.price[bm]);
+    out.push({x:m/12,y:v,m});}
+  return out;
+}
+
+const markerPlugin={id:'markers',
+  beforeEvent(ch,args){const e=args.event;
+    if(e.type==='mouseout'){hideEv();return;}
+    if(e.type!=='mousemove'&&e.type!=='click')return;
+    const{chartArea:ar,scales:{x}}=ch;let hit=-1;
+    VISIBLE_EV.forEach((ev,i)=>{const px=x.getPixelForValue(ev.x);if(px<ar.left||px>ar.right)return;
+      const nearBadge=Math.abs(e.x-px)<=12&&Math.abs(e.y-(ar.top+4))<=14;const nearLine=Math.abs(e.x-px)<=5&&e.y>=ar.top&&e.y<=ar.bottom;
+      if(nearBadge||nearLine)hit=i;});
+    if(hit>=0){ch.tooltip.setActiveElements([],{x:0,y:0});showEv(hit,e.x,e.y);return false;}
+    hideEv();},
+  beforeDatasetsDraw(ch){const{ctx,chartArea:ar,scales:{x}}=ch;ctx.save();
+    const bands=S.pres==='todos'?IDS.map(i=>({a:P[i].p,b:P[i].b+1,l:P[i].name})):[{a:P[S.pres].a,b:P[S.pres].p,l:'transição'}];
+    for(const bd of bands){const x0=Math.max(ar.left,x.getPixelForValue(bd.a/12)),x1=Math.min(ar.right,x.getPixelForValue(bd.b/12));
+      if(x1<=x0)continue;ctx.fillStyle=css('--band');ctx.fillRect(x0,ar.top,x1-x0,ar.bottom-ar.top);
+      ctx.fillStyle=S.pres==='todos'?css(P[IDS.find(i=>P[i].name===bd.l)]?.col||'--muted'):css('--muted');ctx.font=(S.pres==='todos'?'italic 800 15px ':'italic 600 12px ')+css('--f-display');ctx.textAlign='left';if(x1-x0>40)ctx.fillText(bd.l,x0+6,ar.bottom-8);}
+    ctx.restore();},
+  afterDatasetsDraw(ch){const{ctx,chartArea:ar,scales:{x}}=ch;ctx.save();
+    VISIBLE_EV.forEach((e,i)=>{const px=x.getPixelForValue(e.x);if(px<ar.left||px>ar.right)return;
+      const col=css(e.k==='g'?'--global':'--dom');ctx.strokeStyle=col;ctx.lineWidth=1.75;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(px,ar.top+12);ctx.lineTo(px,ar.bottom);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=col;ctx.beginPath();ctx.arc(px,ar.top+4,i===HOV?12:10,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=css('--surface');ctx.font='600 10px '+css('--f-mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,px,ar.top+4.5);});
+    ctx.restore();}};
+const lastIb=(p,b)=>{while(b>p.a&&p.ibovM[b]==null)b--;return b;};
+let VISIBLE_EV=[];let chart=null;let HOV=-1;
+function hideEv(){if(HOV!==-1){HOV=-1;$('evTip').hidden=true;if(chart)chart.draw();}}
+function showEv(i,x,y){const e=VISIBLE_EV[i];const tip=$('evTip');const[yy,mm,dd]=e.d.split('-');
+  tip.innerHTML=`<div class="top"><span class="tag ${e.k}">${i+1} · ${e.k==='g'?'global':'nacional'}</span>${dd}/${mm}/${yy}</div><strong>${e.t}</strong><p>${e.desc}</p>`;
+  tip.hidden=false;const W=$('chartView').clientWidth;const w=tip.offsetWidth;
+  let left=x+16;if(left+w>W)left=Math.max(4,x-16-w);tip.style.left=left+'px';tip.style.top=Math.max(0,Math.min(y-10,$('chartView').clientHeight-tip.offsetHeight))+'px';
+  if(HOV!==i){HOV=i;chart.draw();}}
+
+function visibleEvents(){
+  const span=S.b-S.a;const all=S.showAll||span<=18;
+  const seen=new Set();return active().flatMap(p=>p.ev).filter(e=>e.m>=S.a&&e.m<=S.b&&(all||e.lvl===1)).sort((a,b)=>a.x-b.x).filter(e=>{const k=e.d+e.t.slice(0,12);if(seen.has(k))return false;seen.add(k);return true;});}
+
+function idxSeries(get,a,b,inv){let base=null,bm=null;for(let m=a;m<=b;m++){const v=get(m);if(v!=null){base=v;bm=m;break;}}
+  const out=[];for(let m=a;m<=b;m++){const v=get(m);out.push({x:m/12,y:(v==null||base==null)?null:(inv?base/v:v/base)*100,m});}return out;}
+function multiDS(sub){
+  if(S.pres==='todos')return{ds:[],strip:null};
+  const p=P[S.pres];const a=Math.max(S.a,p.a),b=Math.min(S.b,p.b);const cat=css('--cat'),ink=css('--ink');
+  const last=d=>{for(let i=d.length-1;i>=0;i--)if(d[i].y!=null)return d[i].y;return null;};
+  if(sub.multi==='fx'){
+    const br=idxSeries(m=>at(MK.brl,m),a,b,true);
+    const others=Object.entries(FX).map(([n,arr])=>({label:n,data:idxSeries(m=>at(arr,m),a,b,true)}));
+    const avg=br.map((pt,i)=>{const vs=others.map(o=>o.data[i].y).filter(v=>v!=null);return{x:pt.x,m:pt.m,y:vs.length>=3?Math.exp(vs.reduce((s,v)=>s+Math.log(v),0)/vs.length):null};});
+    const ds=[...others.map(o=>({label:o.label,data:o.data,borderColor:'#cfcfcf',borderWidth:1.2,pointRadius:0,fill:false})),
+      {label:'Média das emergentes',data:avg,borderColor:ink,borderWidth:2.5,borderDash:[6,4],pointRadius:0,fill:false},
+      {label:'Real',data:br,borderColor:cat,borderWidth:3.5,pointRadius:0,fill:false}];
+    const lb=last(br),la=last(avg);
+    return{ds,strip:lb==null?null:[['Real frente ao dólar',lb-100],['Média das emergentes',la==null?null:la-100]],empty:'Sem dados neste período: as séries de moedas emergentes começam em dez/2003.'};}
+  const ewz=idxSeries(m=>at(MK.ewz,m),a,b),eem=idxSeries(m=>at(MK.eem,m),a,b);
+  const ds=[{label:'Emergentes (EEM)',data:eem,borderColor:ink,borderWidth:2.5,borderDash:[6,4],pointRadius:0,fill:false},
+    {label:'Brasil (EWZ)',data:ewz,borderColor:cat,borderWidth:3.5,pointRadius:0,fill:false}];
+  const le=last(ewz),lm=last(eem);
+  return{ds,strip:le==null?null:[['Bolsa brasileira em dólar',le-100],['Bolsas emergentes em dólar',lm==null?null:lm-100]],empty:'Sem dados neste período: o ETF de emergentes começa em abr/2003.'};}
+function spark(cv,vals){const r=window.devicePixelRatio||1;const w=cv.clientWidth||220,h=46;cv.width=w*r;cv.height=h*r;const c=cv.getContext('2d');c.scale(r,r);
+  const v=vals.filter(x=>x!=null);if(v.length<2)return;const lo=Math.min(...v),hi=Math.max(...v),pad=4;
+  const X=i=>pad+i*(w-2*pad)/(vals.length-1),Y=x=>h-pad-(x-lo)/((hi-lo)||1)*(h-2*pad);
+  const up=v[v.length-1]>=v[0];c.strokeStyle=css(up?'--up':'--down');c.lineWidth=2;c.beginPath();let st=false;
+  vals.forEach((x,i)=>{if(x==null)return;st?c.lineTo(X(i),Y(x)):c.moveTo(X(i),Y(x));st=true;});c.stroke();}
+function renderEmp(){
+  const el=$('empView');
+  if(S.pres==='todos'){el.innerHTML='<div class="empty" style="font-size:15px">Escolha um presidente para ver as maiores empresas do período.</div>';return;}
+  const p=P[S.pres];const a=Math.max(S.a,p.a),b=Math.min(S.b,p.b);
+  const card=(rank,name,tk,get)=>{let ma=null,mb=null;for(let m=a;m<=b;m++)if(get(m)!=null){if(ma==null)ma=m;mb=m;}
+    if(ma==null||ma===mb)return{html:`<div class="ecard na"><div class="top"><h4>${name}</h4>${rank?`<span class="rk">${rank}º</span>`:''}</div><div class="tk">Sem histórico de preços para este período</div></div>`};
+    const r=(get(mb)/get(ma)-1)*100,u=((get(mb)/at(BCB.usd,mb))/(get(ma)/at(BCB.usd,ma))-1)*100;const vals=[];for(let m=ma;m<=mb;m++)vals.push(get(m));
+    return{vals,html:`<div class="ecard${rank?'':' ref'}"><div class="top"><h4>${name}</h4>${rank?`<span class="rk">${rank}º</span>`:''}</div><div class="tk">${tk}${ma>a?` · dados desde ${mLong(ma)}`:''}</div>
+      <div class="row"><div><small>em reais</small><span class="cv ${sg(pct(r))}">${pct(r)}</span></div><div><small>em dólar</small><span class="cv ${sg(pct(u))}">${pct(u)}</span></div></div><canvas></canvas></div>`};};
+  const cards=MAIORES[p.id].map((t,i)=>EMP[t]?card(i+1,EMPN[t]||t,t,m=>empPx(t,m)):card(i+1,EMPN[t]||t,'',()=>null));
+  cards.push(card(0,'Ibovespa','referência: índice da bolsa',m=>at(MK.ibov,m)));
+  el.innerHTML=`<div class="egrid">${cards.map(c=>c.html).join('')}</div><p class="note">Critério: as cinco maiores empresas da bolsa por valor de mercado no início do mandato. Preços mensais de fechamento, com dividendos reinvestidos.</p>`;
+  const cvs=el.querySelectorAll('canvas');let k=0;cards.forEach(c=>{if(c.vals){spark(cvs[k],c.vals);k++;}});}
+
+function renderChart(){
+  const sub=curSub();const cat=CATS.find(c=>c.id===S.cat);$('chartTitle').innerHTML=`<span class="cw">${cat.label}</span> · ${sub.label}`;$('chartUnit').textContent=sub.unit;
+  VISIBLE_EV=visibleEvents();HOV=-1;$('evTip').hidden=true;
+  const isEmp=!!sub.emp;$('empView').hidden=!isEmp;document.querySelector('.legend').hidden=isEmp;document.querySelector('.view-toggle').hidden=isEmp;$('cmpStrip').hidden=true;$('chartEmpty').hidden=true;
+  if(isEmp){$('chartView').hidden=true;$('tableView').hidden=true;renderEmp();renderEvents();return;}
+  setView(S.view);
+  let MD=null;if(sub.multi)MD=multiDS(sub);
+  const accent=css('--accent'),ink=css('--ink'),muted=css('--muted'),line=css('--line');
+  const ds=MD?MD.ds:active().map(p=>{const col=css(S.pres==='todos'?p.col:cat.col);return{label:p.name,data:seriesFor(p,sub),type:sub.bar?'bar':'line',borderColor:col,backgroundColor:sub.bar?col:col+'1f',
+    fill:!sub.bar&&!sub.rel&&sub.id!=='juroreal'?'origin':false,borderWidth:2,pointRadius:0,pointHoverRadius:4,stepped:sub.step?'before':false,tension:0,
+    barThickness:Math.max(8,Math.min(48,600/Math.max(1,(S.b-S.a)/12)/3)),borderWidth:2.5}});
+  const span=S.b-S.a;const step=span<=15?1/12:span<=40?0.25:span<=80?0.5:1;
+  const cfg={type:sub.bar?'bar':'line',data:{datasets:ds},plugins:[markerPlugin],
+   options:{responsive:true,maintainAspectRatio:false,animation:false,parsing:true,layout:{padding:{top:14}},
+    interaction:{mode:'nearest',axis:'x',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{
+      title:it=>sub.bar?'Ano '+Math.floor(it[0].raw.x):mLong(it[0].raw.m),
+      label:it=>(S.pres==='todos'||sub.multi?it.dataset.label+': ':'')+(sub.multi?nf(it.raw.y,1):sub.rel||sub.bar||sub.id==='juroreal'?pct(it.raw.y,sub.dec):nf(it.raw.y,sub.dec))}}},
+    scales:{x:{type:'linear',min:S.a/12,max:(S.b+(sub.bar?1:0))/12,grid:{color:line},border:{color:line},
+      ticks:{color:muted,stepSize:step,autoSkip:true,maxRotation:0,font:{family:css('--f-mono'),size:11},
+        callback:v=>{const m=Math.round(v*12);return step>=1||(span>40&&m%12===0)?String(Math.floor(m/12)):mShort(m);}}},
+     y:{grid:{color:line},border:{display:false},beginAtZero:!!sub.bar,ticks:{color:muted,font:{family:css('--f-mono'),size:11},callback:v=>nf(v,sub.dec>0&&Math.abs(v)<20?1:0)}}}}};
+  if(chart)chart.destroy();chart=new Chart($('chart'),cfg);
+  {const has=ds.some(d=>d.data.some(pt=>pt.y!=null));if(!has){$('chartEmpty').textContent=MD?(S.pres==='todos'?'Escolha um presidente para ver esta análise.':MD.empty):sub.id==='icbr'?'Sem dados neste período: o índice de commodities começa em jan/1998.':sub.bar?'Sem dado anual de PIB neste período.':'Sem dados para este indicador no período escolhido.';$('chartEmpty').hidden=false;}}
+  if(MD){
+    if(MD.strip){$('cmpStrip').innerHTML='<span class="l">No período visível:</span>'+MD.strip.map(([l,v])=>`<span>${l} <span class="cv ${sg(pct(v))}">${pct(v)}</span></span>`).join('');$('cmpStrip').hidden=false;}}
+  renderTable(sub,ds);renderEvents();
+}
+function renderTable(sub,ds){
+  const L=S.pres==='todos'||!!sub.multi;const rows=[];for(const d of ds)for(const pt of d.data)if(pt.y!=null)rows.push([d.label,sub.bar?String(Math.floor(pt.x)):mLong(pt.m),pt.y]);
+  const f=v=>sub.multi?nf(v,1):sub.rel||sub.bar||sub.id==='juroreal'?pct(v,sub.dec):nf(v,sub.dec);
+  $('tableView').innerHTML=`<table><thead><tr>${L?'<th>Série</th>':''}<th>${sub.bar?'Ano':'Mês'}</th><th>${sub.label}</th></tr></thead><tbody>${
+    rows.map(r=>`<tr>${L?`<td>${r[0]}</td>`:''}<td${L?' style="font-family:var(--f-mono);font-weight:400"':''}>${r[1]}</td><td>${f(r[2])}</td></tr>`).join('')}</tbody></table>`;
+}
+function renderEvents(){
+  const span=S.b-S.a;const auto=span<=18;
+  const total=new Set(active().flatMap(p=>p.ev).filter(e=>e.m>=S.a&&e.m<=S.b).map(e=>e.d+e.t.slice(0,12))).size;
+  $('evToggle').hidden=auto||total===VISIBLE_EV.length&&!S.showAll;
+  $('evToggle').textContent=S.showAll?'Mostrar só os principais':`Mostrar todos (${total})`;
+  $('evList').innerHTML=VISIBLE_EV.length?VISIBLE_EV.map((e,i)=>{const[y,m,d]=e.d.split('-');
+    return `<div class="evc ${e.k}"><div class="evc-top"><span class="n">${i+1}</span><span class="tag">${e.k==='g'?'global':'nacional'}</span><span class="dt">${d}/${m}/${y}</span></div><div class="t">${e.t}</div><p>${e.desc}</p></div>`}).join('')
+    :'<div class="empty">Nenhum marco registrado neste intervalo.</div>';
+}
+function renderKpis(){
+  const el=$('kpis');$('kpiNote').hidden=S.pres==='todos';if(S.pres==='todos'){el.hidden=true;return;}el.hidden=false;
+  const p=P[S.pres];const a=Math.max(S.a,p.a),b=Math.min(S.b,p.b);const ib=lastIb(p,b);
+  const ch=(f)=>(f(b)/f(a)-1)*100;
+  const infl=(p.price[b]/p.price[a]-1)*100;
+  let sel=0;for(let m=a;m<=b;m++)sel+=p.selicM[m];sel/=(b-a+1);
+  const smr=((p.smM[b]/p.smM[a])/(p.price[b]/p.price[a])-1)*100;
+  const C=['--c-cambio','--c-bolsa','--c-bolsa','--c-economia','--c-juros','--c-economia'];
+  const k=[
+   ['Real frente ao dólar',pct((p.usdM[a]/p.usdM[b]-1)*100),`dólar R$ ${nf(p.usdM[a],2)} → R$ ${nf(p.usdM[b],2)} (${pct(ch(m=>p.usdM[m]))})`],
+   ['Ibovespa (R$)',pct((p.ibovM[ib]/p.ibovM[a]-1)*100),`${nf(p.ibovM[a],0)} → ${nf(p.ibovM[ib],0)}${ib<b?' (até '+mLong(ib)+')':''}`],
+   ['Ibovespa (US$)',pct(((p.ibovM[ib]/p.usdM[ib])/(p.ibovM[a]/p.usdM[a])-1)*100),'o que ganhou quem pensa em dólar'],
+   ['Poder de compra do real',pct((1/(1+infl/100)-1)*100),`IPCA acumulado ${pct(infl)}`+(p.ipcaM[b]!=null?` · 12m no fim ${nf(p.ipcaM[b],1)}%`:'')],
+   ['Selic média',nf(sel,1)+'%',`${nf(p.selicM[a],2)}% → ${nf(p.selicM[b],2)}%`],
+   ['Salário mínimo real',pct(smr),`R$ ${nf(p.smM[a],0)} → R$ ${nf(p.smM[b],0)} nominal`]];
+  el.innerHTML=k.map(([t,v,d],i)=>`<div class="kpi" style="--c:var(${C[i]})"><span class="k">${t}</span><span class="v ${sg(v)}">${v}</span><span class="d">${d}</span></div>`).join('');
+}
+function renderComp(){
+  const rows=IDS.map(id=>{const p=P[id];const a=p.p-1,b=p.b,n=b-a,yrs=n/12;
+    const ann=r=>(Math.pow(r,1/yrs)-1)*100;
+    let sel=0;for(let m=p.p;m<=b;m++)sel+=p.selicM[m];sel/=n;
+    let pw=0,pn=0;for(let m=p.p;m<=b;m++){const v=PIB[Math.floor(m/12)];if(v!=null){pw+=v;pn++;}}
+    return[p.name,ann(p.usdM[a]/p.usdM[b]),(()=>{const ib=lastIb(p,b);return(Math.pow((p.ibovM[ib]/p.usdM[ib])/(p.ibovM[a]/p.usdM[a]),12/(ib-a))-1)*100})(),ann(p.price[b]/p.price[a]),sel,ann((p.smM[b]/p.smM[a])/(p.price[b]/p.price[a])),pn?pw/pn:null,id];});
+  $('compTable').innerHTML=`<table><thead><tr><th>Mandato</th><th>Real vs. dólar</th><th>Ibovespa em US$</th><th>IPCA</th><th>Selic média</th><th>Salário mínimo real</th><th>PIB médio</th></tr></thead><tbody>${
+   rows.map(r=>`<tr class="${S.pres===r[7]?'sel':''}"><td><span class="pp" style="background:var(${P[r[7]].col})">${r[0]}</span></td>${[1,2].map(i=>`<td><span class="cv ${sg(pct(r[i]))}">${pct(r[i])}</span></td>`).join('')}<td><span class="cv">${nf(r[3],1)}%</span></td><td><span class="cv">${nf(r[4],1)}%</span></td>${[5,6].map(i=>`<td><span class="cv ${sg(pct(r[i]))}">${pct(r[i])}</span></td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function renderRange(){
+  const[lo,hi]=bounds();const A=$('rA'),B=$('rB');
+  for(const i of[A,B]){i.min=lo;i.max=hi;i.step=1;}A.value=S.a;B.value=S.b;
+  $('rFrom').textContent=mLong(S.a);$('rTo').textContent=mLong(S.b);
+  const f=$('rFill');const w=hi-lo||1;f.style.left=((S.a-lo)/w*100)+'%';f.style.width=((S.b-S.a)/w*100)+'%';
+  $('bandLegend').textContent=S.pres==='todos'?'Duração de cada mandato':(S.pres==='temer'?'Período antes da posse':'Transição (eleição → posse)');
+}
+function onRange(e){let a=+$('rA').value,b=+$('rB').value;
+  if(b-a<3){if(e.target.id==='rA')a=b-3;else b=a+3;}const[lo,hi]=bounds();S.a=Math.max(lo,a);S.b=Math.min(hi,b);S.yearSel='custom';
+  renderYears();renderKpis();renderChart();renderRange();}
+$('rA').addEventListener('input',onRange);$('rB').addEventListener('input',onRange);
+$('evToggle').onclick=()=>{S.showAll=!S.showAll;renderChart();};
+function setView(v){S.view=v;$('vChart').setAttribute('aria-pressed',v==='chart');$('vTable').setAttribute('aria-pressed',v==='table');
+  $('chartView').hidden=v!=='chart';$('tableView').hidden=v!=='table';}
+$('vChart').onclick=()=>setView('chart');$('vTable').onclick=()=>setView('table');
+
+$('eyebrow').textContent='Estudo de dados · Brasil, 1994 a '+DADOS_ATE.slice(0,4);
+function renderAll(){renderPres();renderCtx();renderYears();renderCats();renderKpis();renderChart();renderRange();renderComp();}
+resetRange();renderAll();
+const rerender=()=>{if(chart)renderChart();};
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rerender);}catch(e){}
+new MutationObserver(rerender).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+
+</body>
+</html>
