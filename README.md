@@ -1,36 +1,9 @@
-# Mandatos em Números
+Mandatos em Números
 
-Estudo de dados sobre o câmbio, a bolsa, os juros, a inflação, o salário mínimo e o PIB em cada mandato presidencial desde o Plano Real (1994).
+Discussões sobre economia e governo costumam vir com números soltos, recortes escolhidos a dedo e pouco contexto. Este projeto nasceu para olhar os dados de outro jeito: os mesmos indicadores, medidos com as mesmas regras, em todos os mandatos presidenciais desde o Plano Real.
 
-Cada período começa meses antes da eleição e traz os acontecimentos nacionais e internacionais da época. Todos os mandatos são medidos com as mesmas regras.
+O site mostra como se comportaram o câmbio, a bolsa, os juros, a inflação, o salário mínimo e o PIB de FHC a Lula 3. Cada período começa meses antes da eleição, para mostrar também como o mercado reagiu, e traz os acontecimentos nacionais e internacionais da época. A comparação com outros países emergentes ajuda a separar o que foi movimento global do que foi particular do Brasil.
 
-## O que tem no site
+Não é um ranking nem uma opinião política. Os números mostram o que aconteceu em cada período, não provam causa.
 
-- Filtro por presidente, de FHC 1 a Lula 3, com zoom por ano
-- Câmbio, Ibovespa, Selic, IPCA, salário mínimo, PIB e commodities
-- Comparação com moedas e bolsas de outros países emergentes
-- As cinco maiores empresas da bolsa no início de cada mandato
-- Marcos históricos, separados em eventos globais e nacionais
-- Tabela comparativa com valores anualizados
-
-## Fontes
-
-- **Banco Central do Brasil** (SGS): dólar (3698), Selic (4189), IPCA 12 meses (13522), IPCA mensal (433), salário mínimo (1619), PIB (7326) e índice de commodities IC-Br (27574)
-- **Yahoo Finance**: Ibovespa, dólar, moedas de emergentes, ETFs EWZ e EEM e ações da B3
-
-## Arquivos
-
-| Arquivo | Função |
-|---|---|
-| `index.html` | O site |
-| `dados.js` | Os números, gerados pelo script |
-| `fetch_data.py` | Baixa as séries e atualiza o `dados.js` |
-
-## Como atualizar os dados
-
-```
-pip install yfinance pandas requests
-python fetch_data.py
-```
-
-Depois, é só enviar o novo `dados.js` para o repositório.
+Dados do Banco Central do Brasil e do Yahoo Finance, coletados com Python.
