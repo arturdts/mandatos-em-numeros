@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="author" content="Artur Damião">
 <meta name="description" content="Estudo de dados sobre câmbio, bolsa, juros, inflação, salário mínimo e PIB em cada mandato presidencial desde o Plano Real.">
 <meta property="og:title" content="Mandatos em Números">
 <meta property="og:description" content="Estudo de dados sobre câmbio, bolsa, juros, inflação, salário mínimo e PIB em cada mandato presidencial desde o Plano Real.">
@@ -34,7 +35,7 @@ body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{background:var(--head-bg);color:var(--head-fg)}
-header.top .wrap{padding-block:48px 20px;display:grid;gap:12px}
+header.top .wrap{padding-block:36px 20px;display:grid;gap:12px}
 .eyebrow{font-size:14px;color:var(--head-muted)}
 h1{font-family:var(--f-display);font-weight:900;font-size:clamp(34px,5.6vw,64px);line-height:1.04;margin:0;text-wrap:balance;letter-spacing:-.02em;font-variation-settings:"SOFT" 50}
 .hl{color:var(--c);background:linear-gradient(transparent 64%,color-mix(in srgb,var(--c) 18%,transparent) 64%);padding:0 .06em;font-style:italic;font-weight:700}
@@ -171,7 +172,22 @@ td{font-family:var(--f-mono)}
 td:first-child{font-family:var(--f-body);font-weight:600}
 tr.sel td{background:var(--accent-soft)}
 .note{font-size:12px;color:var(--muted);margin:0;max-width:80ch}
-footer.foot .wrap{padding-block:0 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#1d3fd6}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:#1d3fd6;color:#fff}
+.bar-in{max-width:1180px;margin:0 auto;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0;flex-wrap:wrap}
+.brand b{font-weight:800;font-size:20px;letter-spacing:-.01em;white-space:nowrap}
+.brand .sep{opacity:.6}
+.brand .eb{font-size:14px;font-weight:500;opacity:.82}
+.bar .author{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;flex:none}
+.bar .author .by{opacity:.85}
+.bar .author a{color:#fff;text-decoration:none;font-size:13px;font-weight:700;border:1.5px solid rgba(255,255,255,.7);border-radius:999px;padding:4px 12px}
+.bar .author a:hover,.bar .author a:focus-visible{background:#fff;color:#1d3fd6}
+@media (max-width:720px){.brand .sep{display:none}.brand{flex-direction:column;gap:0}.brand .eb{font-size:12.5px}.bar .author .by{display:none}}
+footer.foot .wrap{padding-block:0 40px;display:grid;gap:10px}
+.credit a{color:var(--ink);text-decoration:none;font-weight:700;border:1.5px solid var(--ink);border-radius:999px;padding:3px 12px;font-size:13px}
+.credit a:hover,.credit a:focus-visible{background:var(--ink);color:#fff}
+.credit{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 @media (max-width:900px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.ctx-cols{grid-template-columns:1fr}}
 @media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-box{height:290px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -179,8 +195,11 @@ footer.foot .wrap{padding-block:0 40px}
 </head>
 <body>
 
+<div class="bar"><div class="bar-in">
+  <div class="brand"><b>Mandatos em Números</b><span class="sep" aria-hidden="true">·</span><span class="eb" id="eyebrow">Estudo de dados · Brasil, 1994 a 2026</span></div>
+  <div class="author"><span class="by">Por Artur Damião</span><a href="https://www.linkedin.com/in/artur-damiao/" target="_blank" rel="noopener" aria-label="LinkedIn de Artur Damião">LinkedIn</a></div>
+</div></div>
 <header class="top"><div class="wrap">
-  <div class="eyebrow" id="eyebrow">Estudo de dados · Brasil, 1994 a 2026</div>
   <h1>Como se comportaram o <span class="hl c1">câmbio</span>, a <span class="hl c2">bolsa</span>, os <span class="hl c3">juros</span> e a <span class="hl c4">inflação</span> em cada mandato presidencial</h1>
   <p class="lede">Indicadores econômicos de nove mandatos desde o Plano Real, todos medidos com as mesmas regras. Cada período começa meses antes da eleição e traz os acontecimentos nacionais e internacionais da época.</p>
 </div></header>
@@ -244,7 +263,7 @@ footer.foot .wrap{padding-block:0 40px}
     <p class="note">Mandatos têm durações diferentes, por isso tudo é anualizado. Salário mínimo real = reajuste nominal descontado o IPCA. A comparação mostra o que aconteceu no período, não prova causa: o contexto global de cada época pesa muito. PIB médio ponderado pelos meses de cada mandato no ano.</p>
   </section>
 </div></main>
-<footer class="foot"><div class="wrap"><p class="note">Fontes: Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (SGS): dólar 3698, Selic 4189, IPCA 12 meses 13522, IPCA mensal 433, salário mínimo 1619, PIB 7326, IC-Br 27574. Yahoo Finance: Ibovespa (^BVSP), dólar (BRL=X), moedas de México, África do Sul, Chile, Colômbia, Índia e Indonésia, ETFs EWZ e EEM, ações listadas na B3.</p></div></footer>
+<footer class="foot"><div class="wrap"><p class="note">Fontes: Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (SGS): dólar 3698, Selic 4189, IPCA 12 meses 13522, IPCA mensal 433, salário mínimo 1619, PIB 7326, IC-Br 27574. Yahoo Finance: Ibovespa (^BVSP), dólar (BRL=X), moedas de México, África do Sul, Chile, Colômbia, Índia e Indonésia, ETFs EWZ e EEM, ações listadas na B3.</p><p class="credit">Feito por Artur Damião <a href="https://www.linkedin.com/in/artur-damiao/" target="_blank" rel="noopener" aria-label="LinkedIn de Artur Damião">LinkedIn</a></p></div></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script src="dados.js"></script>
